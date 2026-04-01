@@ -10,6 +10,7 @@ import {
   getFaculties,
   getCourses,
   getStates,
+  getIndustries,
 } from "../../api/students.api";
 import { StudentWithStatus } from "../../types";
 import PageHeader from "../../components/shared/PageHeader";
@@ -42,6 +43,7 @@ export default function Assign() {
   const [facultyFilter, setFacultyFilter] = useState("");
   const [courseFilter, setCourseFilter] = useState("");
   const [stateFilter, setStateFilter] = useState("");
+  const [industryFilter, setIndustryFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [selectedSupervisor, setSelectedSupervisor] = useState(
     searchParams.get("supervisor") ?? "",
@@ -58,6 +60,7 @@ export default function Assign() {
         faculty: facultyFilter,
         course: courseFilter,
         state: stateFilter,
+        industry: industryFilter,
         status: statusFilter,
         search: debouncedSearch,
       },
@@ -67,6 +70,7 @@ export default function Assign() {
         faculty: facultyFilter || undefined,
         course: courseFilter || undefined,
         state: stateFilter || undefined,
+        industry: industryFilter || undefined,
         status: statusFilter || undefined,
         search: debouncedSearch || undefined,
       }),
@@ -92,6 +96,10 @@ export default function Assign() {
   const { data: states = [] } = useQuery({
     queryKey: ["states"],
     queryFn: getStates,
+  });
+  const { data: industries = [] } = useQuery({
+    queryKey: ["industries"],
+    queryFn: getIndustries,
   });
 
   const statMap = Object.fromEntries(
@@ -166,6 +174,12 @@ export default function Assign() {
                 val: stateFilter,
                 set: setStateFilter,
                 opts: states,
+              },
+              {
+                label: "PPA/Industry",
+                val: industryFilter,
+                set: setIndustryFilter,
+                opts: industries,
               },
             ].map(({ label, val, set, opts }) => (
               <select

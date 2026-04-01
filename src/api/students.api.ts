@@ -6,6 +6,7 @@ export interface StudentFilters {
   department?: string;
   course?: string;
   state?: string;
+  industry?: string;
   status?: string;
   search?: string;
 }
@@ -22,6 +23,7 @@ export async function getStudents(
         department: filters.department,
         course: filters.course,
         state: filters.state,
+        industry: filters.industry,
         status: filters.status,
         search: filters.search,
       },
@@ -42,7 +44,7 @@ export async function uploadStudents(
     .map(({ _errors, _rowIndex, ...row }) => row);
 
   const response = await unwrapData<{ uploaded: number; skipped: number }>(
-    api.post('/api/students/upload', { students }),
+    api.post('/api/students/upload', { students }, { timeout: 180000 }),
   );
 
   return {
