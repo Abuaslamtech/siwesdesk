@@ -54,18 +54,15 @@ export default function Login() {
             <h1 className="text-2xl font-heading font-bold text-slate-900">SiwesDesk</h1>
             <p className="text-sm text-slate-500 mt-1">Al-Hikmah University SIWES Portal</p>
           </div>
-
-          {/* Demo hint */}
+          {/* Registration Information */}
           <div className="mb-6 p-3 bg-gold-50 border border-gold-200 rounded-lg flex items-start gap-2">
-            <Shield className="w-4 h-4 text-gold-600 mt-0.5 flex-shrink-0" />
+            <Shield className="w-4 h-4 text-gold-600 mt-0.5 shrink-0" />
             <div className="text-xs text-gold-800">
-              <p className="font-semibold mb-1">Seeded local accounts</p>
-              <p>Password after `npm run seed`: <span className="font-mono">ChangeMe@123</span></p>
-              <p>Director: <span className="font-mono">director@alhikmah.edu.ng</span></p>
-              <p>Corper: <span className="font-mono">corper@alhikmah.edu.ng</span></p>
-              <p>Supervisor: <span className="font-mono">supervisor@alhikmah.edu.ng</span></p>
+              <p className="font-semibold mb-1">Account Registration</p>
+              <p>New to the portal? Contact your departmental SIWES coordinator to get your login credentials.</p>
             </div>
           </div>
+
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
             <Input
