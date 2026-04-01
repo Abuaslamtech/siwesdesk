@@ -258,16 +258,18 @@ export default function Orientation() {
 
       {/* Student list */}
       <div className="bg-white rounded-lg border border-border">
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
-          <Search className="w-4 h-4 text-slate-400 shrink-0" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search student…"
-            className="flex-1 text-sm focus:outline-none text-slate-800 placeholder:text-slate-400"
-          />
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b border-border">
+          <div className="flex flex-1 items-center gap-2 min-w-[200px]">
+            <Search className="w-4 h-4 text-slate-400 shrink-0" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search student…"
+              className="flex-1 w-full text-sm focus:outline-none text-slate-800 placeholder:text-slate-400 min-w-0 bg-transparent"
+            />
+          </div>
           {filtered.length > 0 && (
-            <label className="flex items-center gap-1.5 text-xs text-slate-500 cursor-pointer shrink-0">
+            <label className="flex items-center gap-1.5 text-xs text-slate-500 cursor-pointer shrink-0 ml-auto">
               <input
                 type="checkbox"
                 checked={allSelected}
