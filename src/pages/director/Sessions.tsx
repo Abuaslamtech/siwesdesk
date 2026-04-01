@@ -46,6 +46,7 @@ export default function Sessions() {
     onSuccess: (session) => {
       toast.success(`SIWES ${session.year} created and set as active`);
       qc.invalidateQueries({ queryKey: ['sessions'] });
+      qc.invalidateQueries({ queryKey: ['active-session'] });
       setModalOpen(false);
       setConfirmYear(null);
       reset();
