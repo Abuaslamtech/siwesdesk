@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
-import { Search, Upload, GraduationCap } from 'lucide-react';
+import { Search, Upload, GraduationCap, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getStudents, uploadStudents, getFaculties, getCourses, getStates } from '../../api/students.api';
 import { parseStudentFile } from '../../utils/parseStudentFile';
@@ -245,6 +245,15 @@ export default function Students() {
                   {parseResult.columnErrors.map((e, i) => <p key={i}>{e}</p>)}
                 </div>
               )}
+            </div>
+          )}
+
+          {!activeSession && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex gap-2 text-sm text-red-800">
+              <AlertTriangle className="w-5 h-5 shrink-0" />
+              <p>
+                <strong>No Active Session:</strong> You must create and activate a session (e.g., 2025/2026) in the Sessions tab before you can upload students.
+              </p>
             </div>
           )}
         </div>
