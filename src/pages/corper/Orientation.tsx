@@ -32,6 +32,7 @@ type BulkPreview = {
 export default function Orientation() {
   const qc = useQueryClient();
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'marked' | 'absent'>('all');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkOpen, setBulkOpen] = useState(false);
   const [bulkText, setBulkText] = useState('');
@@ -59,12 +60,15 @@ export default function Orientation() {
   const allMarked = students.every((s) => markedMap[s.id]);
   const markedCount = students.filter((s) => markedMap[s.id]).length;
 
-  const filtered = students.filter(
-    (s) =>
-      !debouncedSearch ||
+  const filtered = students.filter((s) => {
+    if (statusFilter === 'marked' && !markedMap[s.id]) return false;
+    if (statusFilter === 'absent' && markedMap[s.id]) return false;
+    if (!debouncedSearch) return true;
+    return (
       s.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-      s.matricNo.toLowerCase().includes(debouncedSearch.toLowerCase()),
-  );
+      s.matricNo.toLowerCase().includes(debouncedSearch.toLowerCase())
+    );
+  });
 
   const allSelected = filtered.length > 0 && filtered.every((s) => selected.has(s.id));
 
@@ -259,7 +263,7 @@ export default function Orientation() {
       {/* Student list */}
       <div className="bg-white rounded-lg border border-border">
         <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b border-border">
-          <div className="flex flex-1 items-center gap-2 min-w-[200px]">
+          <div className="flex flex-1 items-center gap-2 min-w-[200px] border-r border-border pr-3">
             <Search className="w-4 h-4 text-slate-400 shrink-0" />
             <input
               value={search}
@@ -268,6 +272,15 @@ export default function Orientation() {
               className="flex-1 w-full text-sm focus:outline-none text-slate-800 placeholder:text-slate-400 min-w-0 bg-transparent"
             />
           </div>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as 'all' | 'marked' | 'absent')}
+            className="h-8 rounded-md border border-border bg-slate-50 text-xs px-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-700/30 font-medium text-slate-700"
+          >
+            <option value="all">All Status</option>
+            <option value="marked">Attended</option>
+            <option value="absent">Absent</option>
+          </select>
           {filtered.length > 0 && (
             <label className="flex items-center gap-1.5 text-xs text-slate-500 cursor-pointer shrink-0 ml-auto">
               <input
