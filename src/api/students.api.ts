@@ -12,21 +12,23 @@ export interface StudentFilters {
 }
 
 export async function getStudents(
-  sessionId: string,
+  sessionId?: string,
   filters: StudentFilters = {},
 ): Promise<StudentWithStatus[]> {
+  const params = {
+    ...(sessionId ? { sessionId } : {}),
+    ...(filters.faculty ? { faculty: filters.faculty } : {}),
+    ...(filters.department ? { department: filters.department } : {}),
+    ...(filters.course ? { course: filters.course } : {}),
+    ...(filters.state ? { state: filters.state } : {}),
+    ...(filters.industry ? { industry: filters.industry } : {}),
+    ...(filters.status ? { status: filters.status } : {}),
+    ...(filters.search ? { search: filters.search } : {}),
+  };
+
   return unwrapData(
     api.get('/api/students', {
-      params: {
-        sessionId,
-        faculty: filters.faculty,
-        department: filters.department,
-        course: filters.course,
-        state: filters.state,
-        industry: filters.industry,
-        status: filters.status,
-        search: filters.search,
-      },
+      params,
     }),
   );
 }
@@ -70,6 +72,5 @@ export async function getStates(): Promise<string[]> {
 }
 
 export async function getIndustries(): Promise<string[]> {
-  const students = await getStudents('', {});
-  return [...new Set(students.map((s) => s.industry).filter(Boolean) as string[])].sort();
+  return unwrapData(api.get('/api/students/industries'));
 }

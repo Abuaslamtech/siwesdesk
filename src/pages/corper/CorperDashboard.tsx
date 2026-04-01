@@ -2,13 +2,12 @@ import { useQuery } from '@tanstack/react-query';
 import { GraduationCap, ClipboardCheck, FileBarChart2, Clock, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getProgress } from '../../api/reports.api';
-import { getStudents, getDepartments } from '../../api/students.api';
+import { getStudents } from '../../api/students.api';
 import StatCard from '../../components/shared/StatCard';
 import PageHeader from '../../components/shared/PageHeader';
 import Card from '../../components/ui/Card';
 import ProgressBar from '../../components/ui/ProgressBar';
 import Button from '../../components/ui/Button';
-import Badge from '../../components/ui/Badge';
 import { useActiveSession } from '../../hooks/useActiveSession';
 
 export default function CorperDashboard() {
@@ -25,18 +24,28 @@ export default function CorperDashboard() {
     enabled: !!activeSession,
   });
 
-  const { data: departments = [] } = useQuery({
-    queryKey: ['departments', activeSession?.id],
-    queryFn: getDepartments,
-    enabled: !!activeSession,
-  });
+  const byDept = Object.values(
+    students.reduce<Record<string, { dept: string; count: number; scored: number }>>(
+      (acc, student) => {
+        const dept =
+          student.department?.trim() ||
+          student.course?.trim() ||
+          'Unspecified';
 
-  // Group by department
-  const byDept = departments.map((dept) => ({
-    dept,
-    count: students.filter((s) => (s.department || s.course) === dept).length,
-    scored: students.filter((s) => (s.department || s.course) === dept && s.status === 'completed').length,
-  }));
+        if (!acc[dept]) {
+          acc[dept] = { dept, count: 0, scored: 0 };
+        }
+
+        acc[dept].count += 1;
+        if (student.status === 'completed') {
+          acc[dept].scored += 1;
+        }
+
+        return acc;
+      },
+      {},
+    ),
+  ).sort((a, b) => a.dept.localeCompare(b.dept));
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -118,7 +127,7 @@ export default function CorperDashboard() {
               </div>
             ))}
           </div>
-        ) : byDept.length === 0 ? (
+        ) : students.length === 0 ? (
           <div className="px-5 py-8 text-center text-sm text-slate-400">
             No students uploaded yet. <Link to="/corper/students" className="text-primary-700 underline">Upload now</Link>
           </div>
