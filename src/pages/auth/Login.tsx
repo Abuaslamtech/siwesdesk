@@ -43,7 +43,7 @@ export default function Login() {
       <div className="absolute top-0 right-0 w-96 h-96 bg-gold-400/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-80 h-80 bg-primary-500/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
-      <div className="relative w-full max-w-md">
+      <div className="relative w-full max-w-md flex flex-col gap-8">
         {/* Card */}
         <div className="bg-white rounded-xl shadow-modal p-8">
           {/* Logo */}
@@ -132,7 +132,7 @@ export default function Login() {
           </form>
         </div>
 
-        <p className="text-center text-xs text-primary-300 mt-12">
+        <p className="text-center text-xs text-primary-300 mt-10">
           © {new Date().getFullYear()} Al-Hikmah University, Ilorin. All rights
           reserved.
         </p>
