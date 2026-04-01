@@ -18,13 +18,14 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
       <Toaster
-        position="top-right"
+        position="top-center"
         toastOptions={{
           duration: 4000,
           style: {
             fontFamily: 'Inter, sans-serif',
             fontSize: '14px',
             borderRadius: '10px',
+            maxWidth: '90vw',
           },
         }}
       />
