@@ -6,9 +6,7 @@ import { getStudents } from '../../api/students.api';
 import {
   getOrientationStatus,
   markAllAttended,
-  markByMatricList,
   markSelected,
-  previewBulkMatricList,
 } from '../../api/orientation.api';
 import { StudentWithStatus } from '../../types';
 import PageHeader from '../../components/shared/PageHeader';
@@ -22,7 +20,12 @@ import { cn } from '../../utils/cn';
 import { useActiveSession } from '../../hooks/useActiveSession';
 
 type BulkPreview = {
-  found: { matricNo: string; name: string; department: string | null }[];
+  found: {
+    studentId: string;
+    matricNo: string;
+    name: string;
+    department: string | null;
+  }[];
   notFound: string[];
 };
 
@@ -78,10 +81,40 @@ export default function Orientation() {
   };
 
   const parseMatricNos = () =>
-    bulkText
+    Array.from(
+      new Set(
+        bulkText
       .split(/[\n,;\t]+/)
       .map((value) => value.trim().toUpperCase())
-      .filter(Boolean);
+          .filter(Boolean),
+      ),
+    );
+
+  const buildBulkPreview = (matricNos: string[]): BulkPreview => {
+    const studentMap = new Map(
+      students.map((student) => [student.matricNo.trim().toUpperCase(), student]),
+    );
+
+    const found: BulkPreview['found'] = [];
+    const notFound: string[] = [];
+
+    for (const matricNo of matricNos) {
+      const student = studentMap.get(matricNo);
+      if (!student) {
+        notFound.push(matricNo);
+        continue;
+      }
+
+      found.push({
+        studentId: student.id,
+        matricNo: student.matricNo,
+        name: student.name,
+        department: student.department ?? null,
+      });
+    }
+
+    return { found, notFound };
+  };
 
   const markAllMutation = useMutation({
     mutationFn: () => markAllAttended(activeSession?.id || ''),
@@ -102,30 +135,13 @@ export default function Orientation() {
     onError: () => toast.error('Failed to mark orientation'),
   });
 
-  const previewBulkMutation = useMutation({
-    mutationFn: (matricNos: string[]) => previewBulkMatricList(matricNos),
-    onSuccess: (result) => {
-      setBulkPreview(result);
-      if (result.found.length === 0) {
-        toast.error('No matching matric numbers found');
-        return;
-      }
-
-      toast.success(
-        `${result.found.length} matched${
-          result.notFound.length > 0 ? `, ${result.notFound.length} not found` : ''
-        }`,
-      );
-    },
-    onError: () => toast.error('Failed to preview matric numbers'),
-  });
-
   const markBulkMutation = useMutation({
-    mutationFn: (matricNos: string[]) => markByMatricList(matricNos),
-    onSuccess: ({ marked, notFound }) => {
+    mutationFn: (studentIds: string[]) => markSelected(studentIds),
+    onSuccess: ({ marked }) => {
+      const notFoundCount = bulkPreview?.notFound.length ?? 0;
       toast.success(
         `${marked} student${marked !== 1 ? 's' : ''} marked${
-          notFound.length > 0 ? `, ${notFound.length} not found` : ''
+          notFoundCount > 0 ? `, ${notFoundCount} not found` : ''
         }`,
       );
       setBulkOpen(false);
@@ -143,7 +159,19 @@ export default function Orientation() {
       return;
     }
 
-    previewBulkMutation.mutate(matricNos);
+    const preview = buildBulkPreview(matricNos);
+    setBulkPreview(preview);
+
+    if (preview.found.length === 0) {
+      toast.error('No matching matric numbers found');
+      return;
+    }
+
+    toast.success(
+      `${preview.found.length} matched${
+        preview.notFound.length > 0 ? `, ${preview.notFound.length} not found` : ''
+      }`,
+    );
   };
 
   const handleMarkBulk = () => {
@@ -153,7 +181,15 @@ export default function Orientation() {
       return;
     }
 
-    markBulkMutation.mutate(matricNos);
+    const preview = bulkPreview ?? buildBulkPreview(matricNos);
+    setBulkPreview(preview);
+
+    if (preview.found.length === 0) {
+      toast.error('No matching matric numbers found');
+      return;
+    }
+
+    markBulkMutation.mutate(preview.found.map((student) => student.studentId));
   };
 
   return (
@@ -199,21 +235,23 @@ export default function Orientation() {
 
       {/* Progress summary */}
       <Card>
-        <div className="flex items-center gap-6">
-          <div>
+        <div className="flex flex-wrap items-center gap-y-4 gap-x-6">
+          <div className="min-w-[120px]">
             <p className="text-xs text-slate-500">Marked Attended</p>
             <p className="text-3xl font-heading font-bold text-primary-700">{markedCount}</p>
           </div>
-          <div>
+          <div className="min-w-[120px]">
             <p className="text-xs text-slate-500">Total Students</p>
             <p className="text-3xl font-heading font-bold text-slate-700">{students.length}</p>
           </div>
-          <div>
+          <div className="min-w-[120px]">
             <p className="text-xs text-slate-500">Absent / Untracked</p>
             <p className="text-3xl font-heading font-bold text-amber-600">{students.length - markedCount}</p>
           </div>
           {allMarked && students.length > 0 && (
-            <Badge variant="success" size="md" dot>All students attended</Badge>
+            <div className="w-full sm:w-auto mt-2 sm:mt-0">
+              <Badge variant="success" size="md" dot>All students attended</Badge>
+            </div>
           )}
         </div>
       </Card>
@@ -315,7 +353,6 @@ export default function Orientation() {
             <Button
               variant="secondary"
               size="sm"
-              loading={previewBulkMutation.isPending}
               onClick={handlePreviewBulk}
             >
               Preview Matches
