@@ -3,21 +3,36 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, CheckCircle, ClipboardCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getStudents } from '../../api/students.api';
-import { markAllAttended, markSelected, getOrientationStatus } from '../../api/orientation.api';
+import {
+  getOrientationStatus,
+  markAllAttended,
+  markByMatricList,
+  markSelected,
+  previewBulkMatricList,
+} from '../../api/orientation.api';
 import { StudentWithStatus } from '../../types';
 import PageHeader from '../../components/shared/PageHeader';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import EmptyState from '../../components/ui/EmptyState';
+import Modal from '../../components/ui/Modal';
 import { useDebounce } from '../../hooks/useDebounce';
 import { cn } from '../../utils/cn';
 import { useActiveSession } from '../../hooks/useActiveSession';
+
+type BulkPreview = {
+  found: { matricNo: string; name: string; department: string | null }[];
+  notFound: string[];
+};
 
 export default function Orientation() {
   const qc = useQueryClient();
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [bulkText, setBulkText] = useState('');
+  const [bulkPreview, setBulkPreview] = useState<BulkPreview | null>(null);
   const debouncedSearch = useDebounce(search, 300);
   const { data: activeSession, isLoading: loadingSession } = useActiveSession();
 
@@ -62,6 +77,12 @@ export default function Orientation() {
     else setSelected(new Set(filtered.map((s) => s.id)));
   };
 
+  const parseMatricNos = () =>
+    bulkText
+      .split(/[\n,;\t]+/)
+      .map((value) => value.trim().toUpperCase())
+      .filter(Boolean);
+
   const markAllMutation = useMutation({
     mutationFn: () => markAllAttended(activeSession?.id || ''),
     onSuccess: ({ marked }) => {
@@ -81,6 +102,60 @@ export default function Orientation() {
     onError: () => toast.error('Failed to mark orientation'),
   });
 
+  const previewBulkMutation = useMutation({
+    mutationFn: (matricNos: string[]) => previewBulkMatricList(matricNos),
+    onSuccess: (result) => {
+      setBulkPreview(result);
+      if (result.found.length === 0) {
+        toast.error('No matching matric numbers found');
+        return;
+      }
+
+      toast.success(
+        `${result.found.length} matched${
+          result.notFound.length > 0 ? `, ${result.notFound.length} not found` : ''
+        }`,
+      );
+    },
+    onError: () => toast.error('Failed to preview matric numbers'),
+  });
+
+  const markBulkMutation = useMutation({
+    mutationFn: (matricNos: string[]) => markByMatricList(matricNos),
+    onSuccess: ({ marked, notFound }) => {
+      toast.success(
+        `${marked} student${marked !== 1 ? 's' : ''} marked${
+          notFound.length > 0 ? `, ${notFound.length} not found` : ''
+        }`,
+      );
+      setBulkOpen(false);
+      setBulkText('');
+      setBulkPreview(null);
+      qc.invalidateQueries({ queryKey: ['orientation'] });
+    },
+    onError: () => toast.error('Failed to mark by matric list'),
+  });
+
+  const handlePreviewBulk = () => {
+    const matricNos = parseMatricNos();
+    if (matricNos.length === 0) {
+      toast.error('Paste at least one matric number');
+      return;
+    }
+
+    previewBulkMutation.mutate(matricNos);
+  };
+
+  const handleMarkBulk = () => {
+    const matricNos = parseMatricNos();
+    if (matricNos.length === 0) {
+      toast.error('Paste at least one matric number');
+      return;
+    }
+
+    markBulkMutation.mutate(matricNos);
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
@@ -88,6 +163,13 @@ export default function Orientation() {
         subtitle={`${markedCount} of ${students.length} students marked as attended`}
         action={
           <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setBulkOpen(true)}
+            >
+              Mark by Matric List
+            </Button>
             {selected.size > 0 && (
               <Button
                 variant="secondary"
@@ -207,6 +289,127 @@ export default function Orientation() {
           </div>
         )}
       </div>
+
+      <Modal
+        isOpen={bulkOpen}
+        onClose={() => {
+          setBulkOpen(false);
+          setBulkText('');
+          setBulkPreview(null);
+        }}
+        title="Mark by Matric Numbers"
+        size="lg"
+        footer={
+          <>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                setBulkOpen(false);
+                setBulkText('');
+                setBulkPreview(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              loading={previewBulkMutation.isPending}
+              onClick={handlePreviewBulk}
+            >
+              Preview Matches
+            </Button>
+            <Button
+              size="sm"
+              loading={markBulkMutation.isPending}
+              onClick={handleMarkBulk}
+            >
+              Mark Matric List
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-slate-700">
+              Matric Numbers
+            </label>
+            <textarea
+              value={bulkText}
+              onChange={(event) => {
+                setBulkText(event.target.value);
+                setBulkPreview(null);
+              }}
+              placeholder="Paste matric numbers separated by new lines or commas"
+              className="min-h-40 w-full rounded-md border border-border bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-700/30 focus:border-primary-700"
+            />
+            <p className="text-xs text-slate-500">
+              Use this when attendance was taken on paper and ticking one by one is too slow.
+            </p>
+          </div>
+
+          {bulkPreview && (
+            <div className="space-y-3 rounded-lg border border-border bg-slate-50 p-4">
+              <div className="grid grid-cols-2 gap-3 text-center">
+                <div className="rounded bg-green-50 p-3">
+                  <p className="text-lg font-bold text-green-700">
+                    {bulkPreview.found.length}
+                  </p>
+                  <p className="text-xs text-slate-500">Matched</p>
+                </div>
+                <div className="rounded bg-amber-50 p-3">
+                  <p className="text-lg font-bold text-amber-700">
+                    {bulkPreview.notFound.length}
+                  </p>
+                  <p className="text-xs text-slate-500">Not Found</p>
+                </div>
+              </div>
+
+              {bulkPreview.found.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Matched Students
+                  </p>
+                  <div className="max-h-40 space-y-1 overflow-y-auto rounded border border-border bg-white p-2">
+                    {bulkPreview.found.map((student) => (
+                      <div
+                        key={student.matricNo}
+                        className="flex items-center justify-between gap-3 rounded px-2 py-1.5 text-sm"
+                      >
+                        <div className="min-w-0">
+                          <p className="truncate font-medium text-slate-800">
+                            {student.name}
+                          </p>
+                          <p className="font-mono text-xs text-slate-400">
+                            {student.matricNo}
+                          </p>
+                        </div>
+                        <span className="shrink-0 text-xs text-slate-500">
+                          {student.department || 'No department'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {bulkPreview.notFound.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Not Found
+                  </p>
+                  <div className="rounded border border-amber-200 bg-amber-50 p-2">
+                    <p className="text-xs text-amber-800">
+                      {bulkPreview.notFound.join(', ')}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 }

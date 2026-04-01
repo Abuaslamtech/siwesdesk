@@ -15,6 +15,17 @@ export async function markByMatricList(
   return result;
 }
 
+export async function previewBulkMatricList(
+  matricNos: string[],
+): Promise<{
+  found: { matricNo: string; name: string; department: string | null }[];
+  notFound: string[];
+}> {
+  return unwrapData(
+    api.post('/api/orientation/preview-bulk', { matricNos }),
+  );
+}
+
 export async function markSelected(
   studentIds: string[],
 ): Promise<{ marked: number }> {
