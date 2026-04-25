@@ -6,6 +6,9 @@ import RoleGuard from "../components/shared/RoleGuard";
 // Auth
 import Login from "../pages/auth/Login";
 
+// Public (no auth required)
+import ResultLookup from "../pages/public/ResultLookup";
+
 // Director
 import DirectorDashboard from "../pages/director/DirectorDashboard";
 import Supervisors from "../pages/director/Supervisors";
@@ -22,6 +25,7 @@ import Reports from "../pages/corper/Reports";
 import SupervisorDashboard from "../pages/supervisor/SupervisorDashboard";
 import MyStudents from "../pages/supervisor/MyStudents";
 import ScoreEntry from "../pages/supervisor/ScoreEntry";
+import BulkUpload from "../pages/supervisor/BulkUpload";
 
 // Role-based redirect from /dashboard
 import DashboardRedirect from "./DashboardRedirect";
@@ -76,6 +80,7 @@ export const router = createBrowserRouter([
                 path: "/supervisor/students/:id/score",
                 element: <ScoreEntry />,
               },
+              { path: "/supervisor/bulk-upload", element: <BulkUpload /> },
             ],
           },
         ],
@@ -84,4 +89,6 @@ export const router = createBrowserRouter([
   },
   // Catch-all
   { path: "*", element: <Navigate to="/dashboard" replace /> },
+  // Public routes — no authentication required
+  { path: "/results", element: <ResultLookup /> },
 ]);

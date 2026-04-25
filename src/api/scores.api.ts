@@ -34,6 +34,32 @@ export async function saveDraft(
   );
 }
 
+export interface BulkScoreEntry {
+  studentId: string;
+  supervisorScore: number;
+  industryScore: number;
+}
+
+export interface BulkScoreResult {
+  studentId: string;
+  status: 'ok' | 'error';
+  message?: string;
+  score?: Score;
+}
+
+export interface BulkSubmitResponse {
+  succeeded: number;
+  failed: number;
+  results: BulkScoreResult[];
+}
+
+export async function bulkSubmitScores(
+  entries: BulkScoreEntry[],
+): Promise<BulkSubmitResponse> {
+  return unwrapData(api.post('/api/scores/bulk', { entries }));
+}
+
 export async function getAllScores(): Promise<Score[]> {
   return [];
 }
+

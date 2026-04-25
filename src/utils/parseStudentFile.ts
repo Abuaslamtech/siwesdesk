@@ -35,7 +35,9 @@ const COLUMN_ALIASES: Record<string, keyof ParsedStudentRow> = {
   'level':        'level',
 
   'state':        'state',
-  'state of origin': 'state',
+  'siwes state':  'state',
+  'placement state': 'state',
+  'state of siwes': 'state',
 
   'lga':          'lga',
   'location':     'lga',
@@ -63,6 +65,8 @@ const COLUMN_ALIASES: Record<string, keyof ParsedStudentRow> = {
   'organisation': 'industry',
   'organization': 'industry',
   'establishment':'industry',
+  'address':      'address',
+  'contact address': 'address',
 };
 
 const REQUIRED_COLUMNS: (keyof ParsedStudentRow)[] = [
@@ -131,6 +135,7 @@ export async function parseStudentFile(file: File): Promise<ParseResult> {
             level:      '',
             state:      '',
             lga:        '',
+            address:    '',
             _rowIndex:  idx + 2,
             _errors:    [],
           };

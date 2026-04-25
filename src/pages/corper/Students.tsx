@@ -100,16 +100,22 @@ export default function Students() {
           <p className="font-medium text-slate-800 text-sm">{s.name}</p>
           <p className="text-xs text-slate-400">
             {s.course} {s.faculty ? `(${s.faculty})` : ''} · Lvl {s.level}
+            {s.phone && <span className="text-primary-600 font-medium ml-1">· {s.phone}</span>}
           </p>
         </div>
       )
     },
-    { key: 'state', header: 'State', render: (s) => s.state },
+    { key: 'state', header: 'SIWES State', render: (s) => s.state },
     { key: 'industry', header: 'Placement',
       render: (s) => s.industry ? (
         <div className="max-w-[200px]">
-          <p className="text-xs text-slate-700 truncate">{s.industry}</p>
-          {s.location && <p className="text-xs text-slate-400">{s.location}</p>}
+          <p className="text-xs text-slate-700 truncate font-medium">{s.industry}</p>
+          {s.location && <p className="text-xs text-slate-400">{s.location}, {s.state}</p>}
+          {s.address && (
+            <p className="text-[10px] text-slate-400 mt-0.5 line-clamp-2 leading-tight" title={s.address}>
+              {s.address}
+            </p>
+          )}
         </div>
       ) : <span className="text-slate-300 text-xs">—</span>
     },
@@ -151,7 +157,7 @@ export default function Students() {
         {[
           { label: 'Faculty', val: facultyFilter, set: setFacultyFilter, opts: faculties },
           { label: 'Program', val: courseFilter, set: setCourseFilter, opts: courses },
-          { label: 'State', val: stateFilter, set: setStateFilter, opts: states },
+          { label: 'SIWES State', val: stateFilter, set: setStateFilter, opts: states },
         ].map(({ label, val, set, opts }) => (
           <select
             key={label}
@@ -159,7 +165,7 @@ export default function Students() {
             onChange={(e) => set(e.target.value)}
             className="h-9 rounded-md border border-border bg-white text-sm px-2.5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-700/30 min-w-[100px]"
           >
-            <option value="">All {label}s</option>
+            <option value="">All {label === 'SIWES State' ? 'States' : label + 's'}</option>
             {opts.map((o) => <option key={o} value={o}>{o}</option>)}
           </select>
         ))}

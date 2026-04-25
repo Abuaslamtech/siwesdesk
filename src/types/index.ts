@@ -41,6 +41,7 @@ export interface Student {
   email?: string | null;
   phone?: string | null;
   gender?: string | null;
+  address?: string | null;
   createdAt: string;
 }
 
@@ -159,6 +160,7 @@ export interface ParsedStudentRow {
   gender?: string;
   industry?: string;
   location?: string;
+  address?: string;
   _rowIndex: number;
   _errors: string[];
 }

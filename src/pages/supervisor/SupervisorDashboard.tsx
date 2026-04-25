@@ -38,11 +38,18 @@ export default function SupervisorDashboard() {
             : user?.name || 'Supervisor'
         }
         action={
-          <Link to="/supervisor/students">
-            <Button size="sm" rightIcon={<ArrowRight className="w-4 h-4" />}>
-              Score Students
-            </Button>
-          </Link>
+          <div className="flex gap-2">
+            <Link to="/supervisor/bulk-upload">
+              <Button size="sm" variant="secondary" rightIcon={<ArrowRight className="w-4 h-4" />}>
+                Bulk Upload
+              </Button>
+            </Link>
+            <Link to="/supervisor/students">
+              <Button size="sm" rightIcon={<ArrowRight className="w-4 h-4" />}>
+                Score Students
+              </Button>
+            </Link>
+          </div>
         }
       />
 

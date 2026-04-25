@@ -32,8 +32,12 @@ export default function Login() {
       const { user, token } = await login(data);
       storeLogin(user, token);
       navigate("/dashboard", { replace: true });
-    } catch {
-      toast.error("Invalid email or password");
+    } catch (err: any) {
+      if (!err.response) {
+        toast.error(err.message || "Network Error: Could not connect to API");
+      } else {
+        toast.error(err?.response?.data?.message || "Invalid email or password");
+      }
     }
   };
 

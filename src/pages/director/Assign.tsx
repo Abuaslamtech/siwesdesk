@@ -170,7 +170,7 @@ export default function Assign() {
                 opts: courses,
               },
               {
-                label: "State",
+                label: "SIWES State",
                 val: stateFilter,
                 set: setStateFilter,
                 opts: states,
@@ -188,7 +188,7 @@ export default function Assign() {
                 onChange={(e) => set(e.target.value)}
                 className="h-9 rounded-md border border-border bg-white text-sm px-2.5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-700/30 focus:border-primary-700 min-w-[100px]"
               >
-                <option value="">All {label}s</option>
+                <option value="">All {label === "SIWES State" ? "States" : label + "s"}</option>
                 {opts.map((o) => (
                   <option key={o} value={o}>
                     {o}
@@ -271,6 +271,11 @@ export default function Assign() {
                       </div>
                       <div className="text-xs text-slate-500 mt-0.5 flex flex-wrap gap-x-2">
                         <span>{s.course}</span>·<span>{s.state}</span>
+                        {s.phone && (
+                          <span className="text-primary-600 font-medium">
+                            · {s.phone}
+                          </span>
+                        )}
                       </div>
                     </div>
                     <div className="shrink-0">{statusBadge(s)}</div>
