@@ -69,8 +69,8 @@ export default function ResultLookup() {
             <GraduationCap size={32} />
           </div>
           <h1 className="text-3xl font-heading font-bold text-slate-900 tracking-tight">SIWES Result Portal</h1>
-          <p className="text-slate-500 max-w-sm mx-auto">
-            Enter your matriculation number to check your placement and assessment results.
+          <p className="text-slate-500 text-sm">
+            Enter your matric number to view your SIWES assessment results.
           </p>
         </div>
 
@@ -233,12 +233,10 @@ export default function ResultLookup() {
                   <Calendar size={12} />
                   <span>Published on {new Date(data.result.submittedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
                 </div>
-                {data.student.industry && (
-                  <div className="flex items-center gap-1.5">
-                    <MapPin size={12} />
-                    <span>{data.student.industry}</span>
-                  </div>
-                )}
+                <div className="flex items-center gap-1.5">
+                  <MapPin size={12} />
+                  <span>Al-Hikmah University, Ilorin</span>
+                </div>
               </div>
             </div>
           )}
