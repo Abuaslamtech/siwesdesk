@@ -47,7 +47,7 @@ export type ResultLookupResponse =
 export async function lookupStudentResult(
   matricNo: string,
 ): Promise<ResultLookupResponse> {
-  const url = `${API_BASE}/students/result?matricNo=${encodeURIComponent(matricNo.trim().toUpperCase())}`;
+  const url = `${API_BASE}/api/students/result?matricNo=${encodeURIComponent(matricNo.trim().toUpperCase())}`;
 
   const res = await fetch(url);
 
