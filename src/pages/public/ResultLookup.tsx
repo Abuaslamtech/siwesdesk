@@ -1,44 +1,38 @@
 import { useState, FormEvent } from 'react';
+import { Search, GraduationCap, Calendar, MapPin, AlertCircle, Loader2, CheckCircle2 } from 'lucide-react';
 import {
   lookupStudentResult,
   ResultLookupResponse,
 } from '../../api/public';
-import './ResultLookup.css';
+import Card from '../../components/ui/Card';
+import Button from '../../components/ui/Button';
+import ProgressBar from '../../components/ui/ProgressBar';
 
 // ─── Grade helper ───────────────────────────────────────────────────────────
-function getGrade(siewesFinal: number): { letter: string; label: string; color: string } {
-  if (siewesFinal >= 70) return { letter: 'A', label: 'Distinction', color: '#22c55e' };
-  if (siewesFinal >= 60) return { letter: 'B', label: 'Credit',      color: '#3b82f6' };
-  if (siewesFinal >= 50) return { letter: 'C', label: 'Merit',       color: '#a855f7' };
-  if (siewesFinal >= 45) return { letter: 'D', label: 'Pass',        color: '#f59e0b' };
-  return                        { letter: 'F', label: 'Fail',        color: '#ef4444' };
+function getGrade(siewesFinal: number): { letter: string; label: string; color: 'green' | 'primary' | 'gold' | 'red' } {
+  if (siewesFinal >= 70) return { letter: 'A', label: 'Distinction', color: 'green' };
+  if (siewesFinal >= 60) return { letter: 'B', label: 'Credit',      color: 'primary' };
+  if (siewesFinal >= 50) return { letter: 'C', label: 'Merit',       color: 'gold' };
+  if (siewesFinal >= 45) return { letter: 'D', label: 'Pass',        color: 'gold' };
+  return                        { letter: 'F', label: 'Fail',        color: 'red' };
 }
 
 // ─── Sub-components ─────────────────────────────────────────────────────────
-function ScoreRow({ label, score, max }: { label: string; score: number; max: number }) {
-  const pct = Math.min((score / max) * 100, 100);
+function ScoreRow({ label, score, max, color = 'primary' }: { label: string; score: number; max: number; color?: 'primary' | 'gold' | 'green' | 'red' }) {
   return (
-    <div className="rl-score-row">
-      <div className="rl-score-label-row">
-        <span className="rl-score-label">{label}</span>
-        <span className="rl-score-value">{score} / {max}</span>
+    <div className="space-y-1.5">
+      <div className="flex justify-between text-xs font-medium">
+        <span className="text-slate-600">{label}</span>
+        <span className="text-slate-900">{score} / {max}</span>
       </div>
-      <div className="rl-bar-track">
-        <div
-          className="rl-bar-fill"
-          style={{ width: `${pct}%` }}
-        />
-      </div>
+      <ProgressBar value={(score / max) * 100} size="sm" color={color} />
     </div>
   );
 }
 
-// ─── Main component ──────────────────────────────────────────────────────────
 export default function ResultLookup() {
   const [matricNo, setMatricNo] = useState('');
-  const [status, setStatus] = useState<
-    'idle' | 'loading' | 'success' | 'not-found' | 'error'
-  >('idle');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'not-found' | 'error'>('idle');
   const [data, setData] = useState<ResultLookupResponse | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -68,160 +62,188 @@ export default function ResultLookup() {
       : null;
 
   return (
-    <div className="rl-root">
-      {/* Animated background blobs */}
-      <div className="rl-blob rl-blob-1" />
-      <div className="rl-blob rl-blob-2" />
-      <div className="rl-blob rl-blob-3" />
-
-      <div className="rl-container">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 animate-fade-in">
+      <div className="w-full max-w-2xl space-y-8">
         {/* Header */}
-        <header className="rl-header">
-          <div className="rl-logo-ring">
-            <svg viewBox="0 0 24 24" fill="none" className="rl-logo-icon">
-              <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
-              <path d="M2 17l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary-600 text-white shadow-lg shadow-primary-200 mb-2">
+            <GraduationCap size={32} />
           </div>
-          <h1 className="rl-title">SIWES Result Portal</h1>
-          <p className="rl-subtitle">
-            Enter your matriculation number to check your SIWES placement results
+          <h1 className="text-3xl font-heading font-bold text-slate-900 tracking-tight">SIWES Result Portal</h1>
+          <p className="text-slate-500 max-w-sm mx-auto">
+            Enter your matriculation number to check your placement and assessment results.
           </p>
-        </header>
+        </div>
 
-        {/* Lookup card */}
-        <div className="rl-card">
-          <form onSubmit={handleSubmit} className="rl-form" id="result-lookup-form">
-            <label htmlFor="matric-input" className="rl-form-label">
-              Matriculation Number
-            </label>
-            <div className="rl-input-row">
-              <input
-                id="matric-input"
-                type="text"
-                className="rl-input"
-                placeholder="e.g. HUI/CSC/21/0001"
-                value={matricNo}
-                onChange={(e) => setMatricNo(e.target.value)}
-                autoComplete="off"
-                spellCheck={false}
-                disabled={status === 'loading'}
-              />
-              <button
-                type="submit"
-                id="check-result-btn"
-                className="rl-btn"
-                disabled={status === 'loading' || !matricNo.trim()}
-              >
-                {status === 'loading' ? (
-                  <span className="rl-spinner" />
-                ) : (
-                  'Check Results'
-                )}
-              </button>
+        {/* Lookup Card */}
+        <Card padding="lg" className="shadow-xl shadow-slate-200/50">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="matric-input" className="text-sm font-semibold text-slate-700">
+                Matriculation Number
+              </label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-primary-500 transition-colors">
+                  <Search size={18} />
+                </div>
+                <input
+                  id="matric-input"
+                  type="text"
+                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border-border rounded-xl text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
+                  placeholder="e.g. HUI/CSC/21/0001"
+                  value={matricNo}
+                  onChange={(e) => setMatricNo(e.target.value)}
+                  disabled={status === 'loading'}
+                  autoComplete="off"
+                  spellCheck={false}
+                />
+              </div>
             </div>
+            <Button
+              type="submit"
+              className="w-full py-3.5 rounded-xl text-base"
+              loading={status === 'loading'}
+              disabled={!matricNo.trim()}
+            >
+              Check Results
+            </Button>
           </form>
 
           {/* ── States ─────────────────────────────────────────────────────── */}
 
           {status === 'error' && (
-            <div className="rl-state rl-state-error" role="alert">
-              <span className="rl-state-icon">⚠️</span>
-              <p>{errorMsg}</p>
+            <div className="mt-6 p-4 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3 text-red-700 animate-in fade-in slide-in-from-top-2">
+              <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-sm">System Error</p>
+                <p className="text-xs mt-0.5 opacity-90">{errorMsg}</p>
+              </div>
             </div>
           )}
 
           {status === 'not-found' && (
-            <div className="rl-state rl-state-warn" role="alert">
-              <span className="rl-state-icon">🔍</span>
-              <p>No student found with matric number <strong>{matricNo.trim().toUpperCase()}</strong>.</p>
-              <p className="rl-state-hint">Double-check the number and try again.</p>
+            <div className="mt-6 p-4 bg-amber-50 border border-amber-100 rounded-xl flex items-start gap-3 text-amber-700 animate-in fade-in slide-in-from-top-2">
+              <Search className="w-5 h-5 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-sm">No Student Found</p>
+                <p className="text-xs mt-0.5 opacity-90">
+                  No record matched <strong>{matricNo.trim().toUpperCase()}</strong>. Please verify the number.
+                </p>
+              </div>
             </div>
           )}
 
           {/* Found but not yet published */}
           {status === 'success' && data && 'available' in data && !data.available && (
-            <div className="rl-result-wrap">
-              <div className="rl-student-header">
-                <div className="rl-avatar">{data.student.name.charAt(0)}</div>
+            <div className="mt-8 space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
+              <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-border">
+                <div className="w-12 h-12 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-lg">
+                  {data.student.name.charAt(0)}
+                </div>
                 <div>
-                  <p className="rl-student-name">{data.student.name}</p>
-                  <p className="rl-student-meta">{data.student.matricNo}</p>
-                  {data.student.department && (
-                    <p className="rl-student-meta">{data.student.department}</p>
-                  )}
+                  <h3 className="font-bold text-slate-900">{data.student.name}</h3>
+                  <p className="text-xs text-slate-500 font-medium">{data.student.matricNo}</p>
                 </div>
               </div>
-              <div className="rl-state rl-state-pending" role="status">
-                <span className="rl-state-icon">⏳</span>
-                <p>{data.message}</p>
-                <p className="rl-state-hint">Please check back later or contact your coordinator.</p>
+
+              <div className="p-6 bg-primary-50 rounded-2xl border border-primary-100 text-center space-y-3">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white text-primary-600 shadow-sm">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                </div>
+                <div className="space-y-1">
+                  <p className="font-bold text-primary-900">Results Pending</p>
+                  <p className="text-sm text-primary-700 leading-relaxed max-w-xs mx-auto">
+                    {data.message || 'Your SIWES results are currently being processed and will be available soon.'}
+                  </p>
+                </div>
               </div>
             </div>
           )}
 
-          {/* Full results */}
+          {/* Full Results Display */}
           {status === 'success' && data && 'available' in data && data.available && grade && (
-            <div className="rl-result-wrap">
-              {/* Student info */}
-              <div className="rl-student-header">
-                <div className="rl-avatar">{data.student.name.charAt(0)}</div>
-                <div>
-                  <p className="rl-student-name">{data.student.name}</p>
-                  <p className="rl-student-meta">{data.student.matricNo}</p>
-                  {data.student.department && (
-                    <p className="rl-student-meta">{data.student.department}{data.student.faculty ? ` · ${data.student.faculty}` : ''}</p>
-                  )}
-                  {data.student.industry && (
-                    <p className="rl-student-meta">📍 {data.student.industry}{data.student.state ? `, ${data.student.state}` : ''}</p>
-                  )}
+            <div className="mt-8 space-y-8 animate-in fade-in slide-in-from-top-4 duration-500">
+              {/* Profile Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-5 bg-slate-50 rounded-2xl border border-border">
+                <div className="w-14 h-14 rounded-2xl bg-white shadow-sm border border-border text-primary-700 flex items-center justify-center font-bold text-xl shrink-0">
+                  {data.student.name.charAt(0)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-bold text-slate-900 truncate">{data.student.name}</h3>
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
+                    <span className="text-xs font-semibold text-slate-500 bg-slate-200/50 px-2 py-0.5 rounded uppercase tracking-wider">{data.student.matricNo}</span>
+                    {data.student.department && (
+                      <span className="text-xs text-slate-400 flex items-center gap-1">
+                        <div className="w-1 h-1 rounded-full bg-slate-300" />
+                        {data.student.department}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              <div className="rl-divider" />
-
-              {/* Grade badge */}
-              <div className="rl-grade-row">
-                <div className="rl-grade-badge" style={{ borderColor: grade.color, color: grade.color }}>
-                  <span className="rl-grade-letter">{grade.letter}</span>
-                  <span className="rl-grade-label">{grade.label}</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Grade Card */}
+                <div className={`p-6 rounded-3xl border-2 flex flex-col items-center justify-center text-center space-y-2 ${
+                  grade.color === 'green' ? 'bg-green-50 border-green-200 text-green-700' :
+                  grade.color === 'primary' ? 'bg-primary-50 border-primary-200 text-primary-700' :
+                  grade.color === 'gold' ? 'bg-gold-50 border-gold-200 text-gold-700' :
+                  'bg-red-50 border-red-200 text-red-700'
+                }`}>
+                  <span className="text-5xl font-heading font-black">{grade.letter}</span>
+                  <div className="space-y-0.5">
+                    <p className="font-bold uppercase tracking-widest text-[10px] opacity-60">Final Grade</p>
+                    <p className="text-sm font-bold">{grade.label}</p>
+                  </div>
                 </div>
-                <div className="rl-final-score">
-                  <span className="rl-final-num">{data.result.siewesFinal.toFixed(1)}</span>
-                  <span className="rl-final-denom">/ 100</span>
-                  <span className="rl-final-tag">SIWES Final</span>
+
+                {/* Final Score */}
+                <div className="p-6 bg-slate-900 rounded-3xl text-white flex flex-col items-center justify-center text-center shadow-xl shadow-slate-200">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-heading font-bold">{data.result.siewesFinal.toFixed(1)}</span>
+                    <span className="text-lg opacity-40">/ 100</span>
+                  </div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest opacity-50 mt-1">Assessment Average</p>
                 </div>
               </div>
 
-              {/* Score breakdown */}
-              <div className="rl-breakdown">
-                <p className="rl-breakdown-title">Score Breakdown</p>
-                <ScoreRow label="Orientation"      score={data.result.orientation}     max={20} />
-                <ScoreRow label="Supervisor Score" score={data.result.supervisorScore} max={60} />
-                <ScoreRow label="Industry Score"   score={data.result.industryScore}   max={20} />
+              {/* Breakdown */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <CheckCircle2 size={16} className="text-green-500" />
+                  Detailed Breakdown
+                </h4>
+                <div className="space-y-5 bg-slate-50 p-6 rounded-2xl border border-border">
+                  <ScoreRow label="Orientation"      score={data.result.orientation}     max={20} color="primary" />
+                  <ScoreRow label="Supervisor Score" score={data.result.supervisorScore} max={60} color="primary" />
+                  <ScoreRow label="Industry Score"   score={data.result.industryScore}   max={20} color="primary" />
+                  
+                  <div className="pt-2 mt-2 border-t border-slate-200 flex justify-between items-center">
+                    <span className="text-sm font-bold text-slate-900">Total Raw Score</span>
+                    <span className="text-sm font-bold text-slate-900">{data.result.total} / 100</span>
+                  </div>
+                </div>
               </div>
 
-              {/* Total raw */}
-              <div className="rl-total-row">
-                <span>Raw Total</span>
-                <span className="rl-total-num">{data.result.total} / 100</span>
+              {/* Footer Meta */}
+              <div className="pt-4 border-t border-border flex flex-wrap gap-4 text-[11px] font-medium text-slate-400">
+                <div className="flex items-center gap-1.5">
+                  <Calendar size={12} />
+                  <span>Published on {new Date(data.result.submittedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                </div>
+                {data.student.industry && (
+                  <div className="flex items-center gap-1.5">
+                    <MapPin size={12} />
+                    <span>{data.student.industry}</span>
+                  </div>
+                )}
               </div>
-
-              <p className="rl-timestamp">
-                Published on{' '}
-                {new Date(data.result.submittedAt).toLocaleDateString('en-GB', {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric',
-                })}
-              </p>
             </div>
           )}
-        </div>
+        </Card>
 
-        <p className="rl-footer">
-          Having trouble? Contact your SIWES coordinator.
+        <p className="text-center text-xs text-slate-400 font-medium pb-8">
+          Having trouble? Please contact your departmental SIWES coordinator.
         </p>
       </div>
     </div>

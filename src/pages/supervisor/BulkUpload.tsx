@@ -149,7 +149,19 @@ export default function BulkUpload() {
     reader.onload = (ev) => {
       const text = ev.target?.result as string;
       const lines = text.split('\n').filter(Boolean);
-      const dataLines = lines.slice(1); // skip header
+      if (lines.length === 0) return;
+
+      const headerCols = lines[0].split(',').map(c => c.trim().replace(/^"|"$/g, '').toLowerCase());
+      const matricIdx = headerCols.indexOf('matricno');
+      const supIdx = headerCols.indexOf('supervisorscore');
+      const indIdx = headerCols.indexOf('industryscore');
+
+      if (matricIdx === -1 || supIdx === -1 || indIdx === -1) {
+        toast.error('Invalid CSV: Missing matricNo, supervisorScore, or industryScore column');
+        return;
+      }
+
+      const dataLines = lines.slice(1);
 
       const importMap: Record<
         string,
@@ -159,7 +171,11 @@ export default function BulkUpload() {
       for (const line of dataLines) {
         // handle quoted names
         const cols = line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/);
-        const [matric, , sup, ind] = cols.map((c) => c.replace(/^"|"$/g, '').trim());
+        const mappedCols = cols.map((c) => c.replace(/^"|"$/g, '').trim());
+        const matric = mappedCols[matricIdx];
+        const sup = mappedCols[supIdx];
+        const ind = mappedCols[indIdx];
+
         if (matric) {
           importMap[matric] = {
             supervisorScore: sup ?? '',
