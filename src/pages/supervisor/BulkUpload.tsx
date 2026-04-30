@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -32,7 +32,7 @@ interface RowState {
   name: string;
   matricNo: string;
   course: string;
-  level: number;
+  level: string;
   supervisorScore: string;
   industryScore: string;
   orientation: number;
@@ -55,11 +55,14 @@ export default function BulkUpload() {
   const [rows, setRows] = useState<RowState[]>([]);
   const [results, setResults] = useState<BulkSubmitResponse | null>(null);
 
-  const { isLoading } = useQuery({
+  const { data: students, isLoading } = useQuery({
     queryKey: ['supervisor-students', user?.id],
     queryFn: () => getStudentsForSupervisor(user!.id),
     enabled: !!user,
-    onSuccess: (students: StudentWithStatus[]) => {
+  });
+
+  useEffect(() => {
+    if (students) {
       setRows((prev) => {
         // Keep any scores already typed if the list refreshes
         const prevMap = Object.fromEntries(prev.map((r) => [r.studentId, r]));
@@ -68,7 +71,7 @@ export default function BulkUpload() {
           name: s.name,
           matricNo: s.matricNo,
           course: s.course ?? '',
-          level: s.level,
+          level: String(s.level),
           orientation: s.score?.orientation ?? 0,
           supervisorScore:
             prevMap[s.id]?.supervisorScore ??
@@ -86,8 +89,8 @@ export default function BulkUpload() {
             !s.score.isDraft,
         }));
       });
-    },
-  });
+    }
+  }, [students]);
 
   const mutation = useMutation({
     mutationFn: (entries: BulkScoreEntry[]) => bulkSubmitScores(entries),
