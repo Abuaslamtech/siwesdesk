@@ -57,8 +57,12 @@ export async function lookupStudentResult(
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error(body?.message ?? 'Something went wrong. Please try again.');
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+    const message = (body as any)?.message ?? 'Something went wrong. Please try again.';
+    throw new Error(message as string);
   }
 
-  return res.json() as Promise<ResultLookupResponse>;
+  // The API wraps all responses in { success: true, data: ... }
+  const envelope = await res.json() as { success: boolean; data: ResultLookupResponse };
+  return envelope.data;
 }
