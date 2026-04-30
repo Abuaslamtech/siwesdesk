@@ -8,12 +8,12 @@ import Card from '../../components/ui/Card';
 import ProgressBar from '../../components/ui/ProgressBar';
 
 // ─── Grade helper ───────────────────────────────────────────────────────────
-function getGrade(siewesFinal: number): { letter: string; label: string; color: 'green' | 'primary' | 'gold' | 'red' } {
-  if (siewesFinal >= 70) return { letter: 'A', label: 'Distinction', color: 'green' };
-  if (siewesFinal >= 60) return { letter: 'B', label: 'Credit',      color: 'primary' };
-  if (siewesFinal >= 50) return { letter: 'C', label: 'Merit',       color: 'gold' };
-  if (siewesFinal >= 45) return { letter: 'D', label: 'Pass',        color: 'gold' };
-  return                        { letter: 'F', label: 'Fail',        color: 'red' };
+function getGrade(score: number): { letter: string; label: string; color: 'green' | 'primary' | 'gold' | 'red' } {
+  if (score >= 70) return { letter: 'A', label: 'Distinction', color: 'green' };
+  if (score >= 60) return { letter: 'B', label: 'Credit',      color: 'primary' };
+  if (score >= 50) return { letter: 'C', label: 'Merit',       color: 'gold' };
+  if (score >= 45) return { letter: 'D', label: 'Pass',        color: 'gold' };
+  return                  { letter: 'F', label: 'Fail',        color: 'red' };
 }
 
 // ─── Sub-components ─────────────────────────────────────────────────────────
@@ -57,7 +57,7 @@ export default function ResultLookup() {
     'available' in data &&
     data.available &&
     data.result
-      ? getGrade(data.result.siewesFinal)
+      ? getGrade(data.result.total)
       : null;
 
   return (
@@ -205,10 +205,10 @@ export default function ResultLookup() {
                 {/* Final Score */}
                 <div className="p-6 bg-slate-900 rounded-3xl text-white flex flex-col items-center justify-center text-center shadow-xl shadow-slate-200">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-heading font-bold">{data.result.siewesFinal.toFixed(1)}</span>
+                    <span className="text-4xl font-heading font-bold">{data.result.total}</span>
                     <span className="text-lg opacity-40">/ 100</span>
                   </div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest opacity-50 mt-1">Assessment Average</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest opacity-50 mt-1">Total Score</p>
                 </div>
               </div>
 
@@ -223,10 +223,7 @@ export default function ResultLookup() {
                   <ScoreRow label="Supervisor Score" score={data.result.supervisorScore} max={60} color="primary" />
                   <ScoreRow label="Industry Score"   score={data.result.industryScore}   max={20} color="primary" />
                   
-                  <div className="pt-2 mt-2 border-t border-slate-200 flex justify-between items-center">
-                    <span className="text-sm font-bold text-slate-900">Total Raw Score</span>
-                    <span className="text-sm font-bold text-slate-900">{data.result.total} / 100</span>
-                  </div>
+
                 </div>
               </div>
 
