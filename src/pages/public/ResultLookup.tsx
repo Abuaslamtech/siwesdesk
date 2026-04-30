@@ -5,7 +5,6 @@ import {
   ResultLookupResponse,
 } from '../../api/public';
 import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
 import ProgressBar from '../../components/ui/ProgressBar';
 
 // ─── Grade helper ───────────────────────────────────────────────────────────
@@ -66,7 +65,7 @@ export default function ResultLookup() {
       <div className="w-full max-w-2xl space-y-8">
         {/* Header */}
         <div className="text-center space-y-3">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary-600 text-white shadow-lg shadow-primary-200 mb-2">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary-700 text-white shadow-lg mb-2">
             <GraduationCap size={32} />
           </div>
           <h1 className="text-3xl font-heading font-bold text-slate-900 tracking-tight">SIWES Result Portal</h1>
@@ -89,7 +88,7 @@ export default function ResultLookup() {
                 <input
                   id="matric-input"
                   type="text"
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border-border rounded-xl text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
+                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-primary-700/20 focus:border-primary-700 transition-all outline-none text-sm"
                   placeholder="e.g. HUI/CSC/21/0001"
                   value={matricNo}
                   onChange={(e) => setMatricNo(e.target.value)}
@@ -99,14 +98,20 @@ export default function ResultLookup() {
                 />
               </div>
             </div>
-            <Button
+            <button
               type="submit"
-              className="w-full py-3.5 rounded-xl text-base"
-              loading={status === 'loading'}
-              disabled={!matricNo.trim()}
+              disabled={status === 'loading' || !matricNo.trim()}
+              className="w-full h-11 px-4 bg-primary-700 hover:bg-primary-800 active:bg-primary-900 text-white text-sm font-medium rounded-lg transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Check Results
-            </Button>
+              {status === 'loading' ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Checking...
+                </>
+              ) : (
+                'Check Results'
+              )}
+            </button>
           </form>
 
           {/* ── States ─────────────────────────────────────────────────────── */}
