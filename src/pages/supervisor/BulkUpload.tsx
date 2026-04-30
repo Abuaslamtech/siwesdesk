@@ -123,11 +123,11 @@ export default function BulkUpload() {
   // CSV download ─────────────────────────────────────────────────────────────
 
   function downloadTemplate() {
-    const header = 'studentId,name,matricNo,supervisorScore,industryScore\n';
+    const header = 'matricNo,name,supervisorScore,industryScore\n';
     const body = rows
       .map(
         (r) =>
-          `${r.studentId},"${r.name}",${r.matricNo},${r.supervisorScore},${r.industryScore}`,
+          `${r.matricNo},"${r.name}",${r.supervisorScore},${r.industryScore}`,
       )
       .join('\n');
     const blob = new Blob([header + body], { type: 'text/csv' });
@@ -159,9 +159,9 @@ export default function BulkUpload() {
       for (const line of dataLines) {
         // handle quoted names
         const cols = line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/);
-        const [sid, , , sup, ind] = cols.map((c) => c.replace(/^"|"$/g, '').trim());
-        if (sid) {
-          importMap[sid] = {
+        const [matric, , sup, ind] = cols.map((c) => c.replace(/^"|"$/g, '').trim());
+        if (matric) {
+          importMap[matric] = {
             supervisorScore: sup ?? '',
             industryScore: ind ?? '',
           };
@@ -170,8 +170,8 @@ export default function BulkUpload() {
 
       setRows((prev) =>
         prev.map((r) =>
-          importMap[r.studentId]
-            ? { ...r, ...importMap[r.studentId] }
+          importMap[r.matricNo]
+            ? { ...r, ...importMap[r.matricNo] }
             : r,
         ),
       );
