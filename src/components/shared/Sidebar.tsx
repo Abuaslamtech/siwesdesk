@@ -32,6 +32,7 @@ const navByRole: Record<Role, NavItem[]> = {
   supervisor: [
     { label: 'Dashboard',    path: '/supervisor/dashboard', icon: <LayoutDashboard className="w-[18px] h-[18px]" /> },
     { label: 'My Students',  path: '/supervisor/students',  icon: <BookUser className="w-[18px] h-[18px]" /> },
+    { label: 'Bulk Upload',  path: '/supervisor/bulk-upload', icon: <ClipboardList className="w-[18px] h-[18px]" /> },
   ],
 };
 
