@@ -21,6 +21,7 @@ const navByRole: Record<Role, NavItem[]> = {
     { label: 'Supervisors',     path: '/director/supervisors',icon: <UserCheck className="w-[18px] h-[18px]" /> },
     { label: 'Students',        path: '/director/students',   icon: <GraduationCap className="w-[18px] h-[18px]" /> },
     { label: 'Assign Students', path: '/director/assign',     icon: <Users className="w-[18px] h-[18px]" /> },
+    { label: 'Reports',         path: '/director/reports',    icon: <FileBarChart2 className="w-[18px] h-[18px]" /> },
     { label: 'Sessions',        path: '/director/sessions',   icon: <Calendar className="w-[18px] h-[18px]" /> },
   ],
   corper: [

@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
-import { Search, Upload, GraduationCap, AlertTriangle } from 'lucide-react';
+import { Search, Upload, GraduationCap, AlertTriangle, Eye, FileDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getStudents, uploadStudents, getFaculties, getCourses, getStates } from '../../api/students.api';
+import { downloadMasterList } from '../../api/reports.api';
 import { parseStudentFile } from '../../utils/parseStudentFile';
 import { StudentWithStatus } from '../../types';
 import PageHeader from '../../components/shared/PageHeader';
@@ -33,6 +34,7 @@ export default function Students() {
   const [stateFilter, setStateFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<StudentWithStatus | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [parseResult, setParseResult] = useState<Awaited<ReturnType<typeof parseStudentFile>> | null>(null);
   const [parsing, setParsing] = useState(false);
@@ -74,6 +76,12 @@ export default function Students() {
       setParseResult(null);
     },
     onError: () => toast.error('Upload failed. Please try again.'),
+  });
+
+  const masterListMutation = useMutation({
+    mutationFn: () => downloadMasterList(activeSession?.id),
+    onSuccess: () => toast.success('Master list downloaded'),
+    onError: () => toast.error('Failed to download master list'),
   });
 
   const handleFile = async (file: File) => {
@@ -125,6 +133,16 @@ export default function Students() {
         return <Badge variant={b.variant}>{b.label}</Badge>;
       }
     },
+    { key: 'id', header: 'Action', align: 'center',
+      render: (s) => (
+        <button
+          onClick={() => setSelectedStudent(s)}
+          className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-slate-700 hover:text-primary-700 bg-slate-50 hover:bg-primary-50 rounded border border-slate-200 hover:border-primary-300 transition-colors"
+        >
+          <Eye className="w-3.5 h-3.5" /> Details
+        </button>
+      )
+    },
   ];
 
   return (
@@ -137,9 +155,20 @@ export default function Students() {
             : 'No active session'
         }
         action={
-          <Button leftIcon={<Upload className="w-4 h-4" />} onClick={() => setUploadOpen(true)}>
-            Upload List
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              leftIcon={<FileDown className="w-4 h-4" />}
+              loading={masterListMutation.isPending}
+              disabled={!activeSession || students.length === 0}
+              onClick={() => masterListMutation.mutate()}
+            >
+              Export Master List
+            </Button>
+            <Button leftIcon={<Upload className="w-4 h-4" />} onClick={() => setUploadOpen(true)}>
+              Upload List
+            </Button>
+          </div>
         }
       />
 
@@ -263,6 +292,85 @@ export default function Students() {
             </div>
           )}
         </div>
+      </Modal>
+
+      {/* Student Details Modal */}
+      <Modal
+        isOpen={!!selectedStudent}
+        onClose={() => setSelectedStudent(null)}
+        title="Student SIWES Details"
+        size="lg"
+      >
+        {selectedStudent && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-border">
+              <div>
+                <h3 className="text-base font-bold text-slate-900">{selectedStudent.name}</h3>
+                <p className="text-xs font-mono text-slate-500">{selectedStudent.matricNo}</p>
+              </div>
+              <Badge variant={STATUS_BADGE[selectedStudent.status].variant}>
+                {STATUS_BADGE[selectedStudent.status].label}
+              </Badge>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-3.5">
+              {/* Academic & Contact Card */}
+              <div className="rounded-lg border border-border p-3.5 space-y-2 bg-slate-50/50">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Academic & Contact</p>
+                <div className="text-xs space-y-1.5 text-slate-700">
+                  <div className="flex justify-between"><span className="text-slate-500">Level:</span> <span className="font-medium">{selectedStudent.level}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Program:</span> <span className="font-medium text-right">{selectedStudent.course || '—'}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Faculty:</span> <span className="font-medium text-right">{selectedStudent.faculty || '—'}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Phone:</span> <span className="font-medium">{selectedStudent.phone || '—'}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">WhatsApp:</span> <span className="font-medium">{selectedStudent.whatsappNumber || '—'}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Email:</span> <span className="font-medium text-right break-all">{selectedStudent.email || '—'}</span></div>
+                </div>
+              </div>
+
+              {/* Placement Details Card */}
+              <div className="rounded-lg border border-border p-3.5 space-y-2 bg-slate-50/50">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Placement Details</p>
+                <div className="text-xs space-y-1.5 text-slate-700">
+                  <div className="flex justify-between"><span className="text-slate-500">Establishment:</span> <span className="font-medium text-right">{selectedStudent.industry || '—'}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">State:</span> <span className="font-medium">{selectedStudent.state}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Area / LGA:</span> <span className="font-medium">{selectedStudent.lga || selectedStudent.location || '—'}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Duration:</span> <span className="font-medium">{selectedStudent.siwesDuration || '—'}</span></div>
+                  <div>
+                    <span className="text-slate-500 block mb-0.5">Address:</span>
+                    <span className="font-medium text-slate-800 text-[11px] block bg-white p-1.5 rounded border border-slate-200">{selectedStudent.address || '—'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Industry Supervisor Card */}
+              <div className="rounded-lg border border-border p-3.5 space-y-2 bg-slate-50/50">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Industry Supervisor</p>
+                <div className="text-xs space-y-1.5 text-slate-700">
+                  <div className="flex justify-between"><span className="text-slate-500">Supervisor:</span> <span className="font-medium">{selectedStudent.industrySupervisorName || '—'}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Phone:</span> <span className="font-medium">{selectedStudent.industrySupervisorPhone || '—'}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Inst. Supervisor:</span> <span className="font-medium">{selectedStudent.assignment?.supervisor?.name ?? 'Unassigned'}</span></div>
+                </div>
+              </div>
+
+              {/* ITF Bank Details Card */}
+              <div className="rounded-lg border border-border p-3.5 space-y-2 bg-slate-50/50">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">ITF Allowance Bank Info</p>
+                <div className="text-xs space-y-1.5 text-slate-700">
+                  <div className="flex justify-between"><span className="text-slate-500">Bank:</span> <span className="font-medium">{selectedStudent.bankName || '—'}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Account Name:</span> <span className="font-medium text-right">{selectedStudent.accountName || '—'}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Account No:</span> <span className="font-mono font-bold text-slate-800">{selectedStudent.accountNumber || '—'}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Sort Code:</span> <span className="font-mono font-medium">{selectedStudent.sortCode || '—'}</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <Button size="sm" variant="secondary" onClick={() => setSelectedStudent(null)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );

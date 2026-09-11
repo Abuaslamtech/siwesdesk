@@ -3,79 +3,131 @@ import { ParsedStudentRow } from '../types';
 
 /** Column header aliases — case-insensitive matching */
 const COLUMN_ALIASES: Record<string, keyof ParsedStudentRow> = {
-  'matric no':    'matricNo',
-  'matric_no':    'matricNo',
-  'matricno':     'matricNo',
-  'matric':       'matricNo',
-  'reg no':       'matricNo',
-  'reg_no':       'matricNo',
+  // Matric
+  'matric no':                     'matricNo',
+  'matric_no':                     'matricNo',
+  'matricno':                      'matricNo',
+  'matric':                        'matricNo',
+  'matric number':                 'matricNo',
+  'matric. number':                'matricNo',
+  'reg no':                        'matricNo',
+  'reg_no':                        'matricNo',
+  'reg number':                    'matricNo',
+  'registration number':           'matricNo',
 
-  'surname':      'surname',
-  'last name':    'surname',
-  'lastname':     'surname',
-  'family name':  'surname',
+  // Names
+  'name in full (surname in capital letter)': 'name',
+  'name in full':                  'name',
+  'full name':                     'name',
+  'student name':                  'name',
+  'name':                          'name',
 
-  'other names':  'otherNames',
-  'other name':   'otherNames',
-  'othernames':   'otherNames',
-  'first name':   'otherNames',
-  'firstname':    'otherNames',
-  'given name':   'otherNames',
-  'full name':    'otherNames',
+  'surname':                       'surname',
+  'last name':                     'surname',
+  'lastname':                      'surname',
+  'family name':                   'surname',
 
-  'department':   'department',
-  'dept':         'department',
+  'other names':                   'otherNames',
+  'other name':                    'otherNames',
+  'othernames':                    'otherNames',
+  'first name':                    'otherNames',
+  'firstname':                     'otherNames',
+  'given name':                    'otherNames',
 
-  'faculty':      'faculty',
+  // Academic
+  'department':                    'department',
+  'dept':                          'department',
+  'faculty':                       'faculty',
+  'course':                        'course',
+  'programme':                     'course',
+  'program':                       'course',
+  'programme of study':            'course',
+  'program of study':              'course',
+  'level':                         'level',
 
-  'course':       'course',
-  'programme':    'course',
-  'program':      'course',
+  // Contact
+  'email':                         'email',
+  'e-mail':                        'email',
+  'email address':                 'email',
+  'phone':                         'phone',
+  'phone no':                      'phone',
+  'phone number':                  'phone',
+  'mobile':                        'phone',
+  'gsm':                           'phone',
+  'tel':                           'phone',
+  'whatsapp':                      'whatsappNumber',
+  'whatsapp number':               'whatsappNumber',
+  'whatsapp number only':          'whatsappNumber',
+  'whatsapp no':                   'whatsappNumber',
+  'whats app':                     'whatsappNumber',
 
-  'level':        'level',
+  // Bank & ITF stipend
+  'bank name':                     'bankName',
+  'bank':                          'bankName',
+  'account name':                  'accountName',
+  'acct name':                     'accountName',
+  'bank account name':             'accountName',
+  'account number':                'accountNumber',
+  'account no':                    'accountNumber',
+  'acct number':                   'accountNumber',
+  'acct no':                       'accountNumber',
+  'nuban':                         'accountNumber',
+  'sort code':                     'sortCode',
+  'sortcode':                      'sortCode',
+  'bank sort code':                'sortCode',
 
-  'state':        'state',
-  'siwes state':  'state',
-  'placement state': 'state',
-  'state of siwes': 'state',
+  // Placement info
+  'industry':                      'industry',
+  'company':                       'industry',
+  'placement':                     'industry',
+  'organisation':                  'industry',
+  'organization':                  'industry',
+  'establishment':                 'industry',
+  'siwes placement':               'industry',
+  'address':                       'address',
+  'contact address':               'address',
+  'address siwes placement':       'address',
+  'placement address':             'address',
+  'siwes placement address':       'address',
 
-  'lga':          'lga',
-  'location':     'lga',
-  'city':         'lga',
-  'l.g.a':        'lga',
-  'lg area':      'lga',
+  // Location / State
+  'state':                         'state',
+  'siwes state':                   'state',
+  'placement state':               'state',
+  'state of siwes':                'state',
+  'state of placement':            'state',
+  'lga':                           'lga',
+  'location':                      'location',
+  'city':                          'location',
+  'l.g.a':                         'lga',
+  'lg area':                       'lga',
+  'area/local government/town/':   'lga',
+  'area/local government/town':    'lga',
+  'area':                          'lga',
+  'local government':              'lga',
+  'town':                          'lga',
 
-  'email':        'email',
-  'e-mail':       'email',
-  'email address':'email',
+  // Industry supervisor & duration
+  'industry-based supervisor name': 'industrySupervisorName',
+  'industry based supervisor name': 'industrySupervisorName',
+  'industry supervisor name':      'industrySupervisorName',
+  'industry supervisor':           'industrySupervisorName',
+  'company supervisor name':       'industrySupervisorName',
+  'company supervisor':            'industrySupervisorName',
+  'industry-based supervisor phone number': 'industrySupervisorPhone',
+  'industry based supervisor phone number': 'industrySupervisorPhone',
+  'industry supervisor phone number':       'industrySupervisorPhone',
+  'industry supervisor phone':              'industrySupervisorPhone',
+  'industry supervisor no':                 'industrySupervisorPhone',
+  'industry supervisor mobile':             'industrySupervisorPhone',
+  'duration of siwes exercise':    'siwesDuration',
+  'duration of siwes':             'siwesDuration',
+  'siwes duration':                'siwesDuration',
+  'duration':                      'siwesDuration',
 
-  'phone':        'phone',
-  'phone no':     'phone',
-  'phone number': 'phone',
-  'mobile':       'phone',
-  'gsm':          'phone',
-  'tel':          'phone',
-
-  'gender':       'gender',
-  'sex':          'gender',
-
-  'industry':     'industry',
-  'company':      'industry',
-  'placement':    'industry',
-  'organisation': 'industry',
-  'organization': 'industry',
-  'establishment':'industry',
-  'address':      'address',
-  'contact address': 'address',
+  'gender':                        'gender',
+  'sex':                           'gender',
 };
-
-const REQUIRED_COLUMNS: (keyof ParsedStudentRow)[] = [
-  'matricNo',
-  'surname',
-  'otherNames',
-  'level',
-  'state',
-];
 
 export interface ParseResult {
   rows: ParsedStudentRow[];
@@ -118,10 +170,22 @@ export async function parseStudentFile(file: File): Promise<ParseResult> {
 
         const detectedFields = new Set(Object.values(headerMap));
         const columnErrors: string[] = [];
-        for (const req of REQUIRED_COLUMNS) {
-          if (!detectedFields.has(req)) {
-            columnErrors.push(`Missing required column: ${req}`);
-          }
+
+        // Required headers validation
+        if (!detectedFields.has('matricNo')) {
+          columnErrors.push('Missing required column: Matric. Number');
+        }
+        if (!detectedFields.has('level')) {
+          columnErrors.push('Missing required column: Level');
+        }
+        if (!detectedFields.has('state')) {
+          columnErrors.push('Missing required column: State');
+        }
+        const hasNameField =
+          detectedFields.has('name') ||
+          (detectedFields.has('surname') && detectedFields.has('otherNames'));
+        if (!hasNameField) {
+          columnErrors.push('Missing required column: Name in Full (or Surname and Other Names)');
         }
 
         const rows: ParsedStudentRow[] = raw.map((rawRow, idx) => {
@@ -145,11 +209,46 @@ export async function parseStudentFile(file: File): Promise<ParseResult> {
             (row as unknown as Record<string, unknown>)[field] = val;
           }
 
-          // Combine surname + otherNames for display name (will be done in API layer)
-          for (const req of REQUIRED_COLUMNS) {
-            if (!row[req]) {
-              row._errors.push(`Row ${row._rowIndex}: ${req} is empty`);
+          // Smart name decomposition if full name was provided
+          if (row.name && (!row.surname || !row.otherNames)) {
+            const trimmedName = row.name.trim();
+            if (trimmedName.includes(',')) {
+              const [s, ...rest] = trimmedName.split(',');
+              if (!row.surname) row.surname = s.trim();
+              if (!row.otherNames) row.otherNames = rest.join(' ').trim();
+            } else {
+              const parts = trimmedName.split(/\s+/).filter(Boolean);
+              if (parts.length > 0) {
+                if (!row.surname) row.surname = parts[0];
+                if (!row.otherNames) {
+                  row.otherNames = parts.slice(1).join(' ') || parts[0];
+                }
+              }
             }
+          }
+
+          // Fallback if surname is set but not name
+          if (!row.name && (row.surname || row.otherNames)) {
+            row.name = `${row.surname} ${row.otherNames}`.trim();
+          }
+
+          // Sync location from LGA if location not explicitly set
+          if (row.lga && !row.location) {
+            row.location = row.lga;
+          }
+
+          // Validate required row fields
+          if (!row.matricNo) {
+            row._errors.push(`Row ${row._rowIndex}: Matric number is empty`);
+          }
+          if (!row.name && !row.surname) {
+            row._errors.push(`Row ${row._rowIndex}: Student name is empty`);
+          }
+          if (!row.level) {
+            row._errors.push(`Row ${row._rowIndex}: Level is empty`);
+          }
+          if (!row.state) {
+            row._errors.push(`Row ${row._rowIndex}: State is empty`);
           }
 
           return row;

@@ -1,7 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
-import { Users, UserCheck, ClipboardList, Clock, TrendingUp, ArrowRight } from 'lucide-react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { Users, UserCheck, ClipboardList, Clock, TrendingUp, ArrowRight, FileDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { getProgress } from '../../api/reports.api';
+import toast from 'react-hot-toast';
+import { getProgress, downloadSupervisorScores } from '../../api/reports.api';
 import { getSupervisors } from '../../api/users.api';
 import StatCard from '../../components/shared/StatCard';
 import PageHeader from '../../components/shared/PageHeader';
@@ -23,17 +24,30 @@ export default function DirectorDashboard() {
     queryFn: getSupervisors,
   });
 
+  const supervisorScoresMutation = useMutation({
+    mutationFn: () => downloadSupervisorScores(activeSession?.id),
+    onSuccess: () => toast.success('Supervisor scores downloaded'),
+    onError: () => toast.error('Failed to download supervisor scores'),
+  });
+
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
         title="Director Dashboard"
         subtitle={activeSession ? `SIWES ${activeSession.year} — Overview` : 'No active session'}
         action={
-          <Link to="/director/assign">
-            <Button size="sm" rightIcon={<ArrowRight className="w-4 h-4" />}>
-              View Assignments
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link to="/director/reports">
+              <Button size="sm" variant="secondary" leftIcon={<FileDown className="w-4 h-4" />}>
+                Reports & Downloads
+              </Button>
+            </Link>
+            <Link to="/director/assign">
+              <Button size="sm" rightIcon={<ArrowRight className="w-4 h-4" />}>
+                View Assignments
+              </Button>
+            </Link>
+          </div>
         }
       />
 
@@ -100,12 +114,23 @@ export default function DirectorDashboard() {
             <TrendingUp className="w-4 h-4 text-primary-600" />
             Supervisor Progress
           </h3>
-          <Link
-            to="/director/supervisors"
-            className="text-xs text-primary-700 hover:underline font-medium"
-          >
-            Manage Supervisors →
-          </Link>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => supervisorScoresMutation.mutate()}
+              disabled={supervisorScoresMutation.isPending}
+              className="text-xs text-primary-700 hover:text-primary-800 font-medium inline-flex items-center gap-1 hover:underline cursor-pointer"
+            >
+              <FileDown className="w-3.5 h-3.5" />
+              {supervisorScoresMutation.isPending ? 'Downloading…' : 'Export Scores (.xlsx)'}
+            </button>
+            <span className="text-slate-300">|</span>
+            <Link
+              to="/director/supervisors"
+              className="text-xs text-primary-700 hover:underline font-medium"
+            >
+              Manage Supervisors →
+            </Link>
+          </div>
         </div>
         {loadingProgress || loadingSups ? (
           <div className="divide-y divide-border">

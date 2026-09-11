@@ -7,6 +7,26 @@ export async function getProgress(sessionId?: string): Promise<ProgressStats> {
   );
 }
 
+export async function downloadMasterList(sessionId?: string): Promise<void> {
+  return downloadResponse(
+    api.get('/api/reports/export/master-list', {
+      params: { sessionId },
+      responseType: 'blob',
+    }),
+    'siwes-master-list.xlsx',
+  );
+}
+
+export async function downloadSupervisorScores(sessionId?: string): Promise<void> {
+  return downloadResponse(
+    api.get('/api/reports/export/supervisor-scores', {
+      params: { sessionId },
+      responseType: 'blob',
+    }),
+    'siwes-supervisor-scores.xlsx',
+  );
+}
+
 export async function downloadInternalReport(sessionId?: string): Promise<void> {
   return downloadResponse(
     api.get('/api/reports/export/internal', {

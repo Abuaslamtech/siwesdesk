@@ -40,6 +40,14 @@ export interface Student {
   location: string | null;      // city / town of placement
   email?: string | null;
   phone?: string | null;
+  whatsappNumber?: string | null;
+  bankName?: string | null;
+  accountName?: string | null;
+  accountNumber?: string | null;
+  sortCode?: string | null;
+  industrySupervisorName?: string | null;
+  industrySupervisorPhone?: string | null;
+  siwesDuration?: string | null;
   gender?: string | null;
   address?: string | null;
   createdAt: string;
@@ -149,6 +157,7 @@ export interface ParsedStudentRow {
   matricNo: string;
   surname: string;
   otherNames: string;
+  name?: string;
   department?: string;
   faculty?: string;
   course: string;
@@ -157,6 +166,14 @@ export interface ParsedStudentRow {
   lga: string;
   email?: string;
   phone?: string;
+  whatsappNumber?: string;
+  bankName?: string;
+  accountName?: string;
+  accountNumber?: string;
+  sortCode?: string;
+  industrySupervisorName?: string;
+  industrySupervisorPhone?: string;
+  siwesDuration?: string;
   gender?: string;
   industry?: string;
   location?: string;

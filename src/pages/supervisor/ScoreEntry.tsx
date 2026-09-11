@@ -138,11 +138,13 @@ export default function ScoreEntry() {
         <div className="grid sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-border">
           {[
             { icon: <User className="w-4 h-4" />, label: 'Department / Program', value: `${student.department || student.course} (Lvl ${student.level})` },
-            { icon: <MapPin className="w-4 h-4" />, label: 'State / LGA', value: `${student.state} — ${student.lga}` },
+            { icon: <MapPin className="w-4 h-4" />, label: 'State / LGA', value: `${student.state} — ${student.lga || student.location || '—'}` },
             { icon: <Building2 className="w-4 h-4" />, label: 'Industry Placement', value: student.industry || 'Not specified' },
-            { icon: <MapPin className="w-4 h-4" />, label: 'Location', value: student.location || '—' },
+            { icon: <MapPin className="w-4 h-4" />, label: 'Placement Address', value: student.address || student.location || '—' },
+            { icon: <User className="w-4 h-4" />, label: 'Industry Supervisor', value: student.industrySupervisorName ? `${student.industrySupervisorName}${student.industrySupervisorPhone ? ` (${student.industrySupervisorPhone})` : ''}` : 'Not specified' },
+            { icon: <User className="w-4 h-4" />, label: 'Student Contact', value: student.phone ? `${student.phone}${student.whatsappNumber ? ` · WA: ${student.whatsappNumber}` : ''}` : (student.email || '—') },
           ].map(({ icon, label, value }) => (
-            <div key={label} className="px-5 py-4 flex items-start gap-3">
+            <div key={label} className="px-5 py-3.5 flex items-start gap-3">
               <div className="mt-0.5 text-primary-500 shrink-0">{icon}</div>
               <div>
                 <p className="text-xs text-slate-500">{label}</p>
